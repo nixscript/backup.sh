@@ -56,7 +56,7 @@ else
         SPOOL="/var/spool/cron/crontabs/root"
 fi
 # Example target for cron. At 01:00 AM every night.
-CHCK=$(cat "$SPOOL" | grep -i "/bin/backup.sh")
+CHCK=$(grep -i "/bin/backup.sh" < "$SPOOL")
 if [[ -z "$CHCK" ]]; then
         echo "0 1 * * * $HOME/bin/backup.sh" >> $SPOOL
 else
