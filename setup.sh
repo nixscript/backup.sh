@@ -21,7 +21,7 @@ if [[ -z "$RPATH" ]]; then
         RPATH="/home/$REMOTEUSER/bin"
 fi
 echo "Type absolute paths files/dirs to backaup over space [example: /var/www /etc/apache2/sites-avialable]:"
-read TARGETS
+read -r TARGETS
 if [[ -z "$TARGETS" ]]; then
         echo -e "\\e[33;1mWRONG! You must type some paths for backup! Run again.\\e[0m"
 fi
