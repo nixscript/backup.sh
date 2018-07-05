@@ -1,5 +1,5 @@
 #!/bin/bash
-
+# https://github.com/nixscript/backup.sh
 REMOTEUSER="user" # login пользователя на удалённой машине
 REMOTEHOST="example.com" # Можно указать IP
 REMOTEPATH="/home/backupsdir/" # Либо создайте эту директорию на удалённой машине, либо укажите здесь другую.
