@@ -17,6 +17,8 @@ Run `crontab -e` and add next string:
 
 Where $RPATH is absolute path to script clearbckp.sh
 
+Restart cron: `systemctl restart cron`
+
 # backup.sh
 Скрипт для бекапа файлов/директорий на удалённый комп.
 
@@ -31,3 +33,5 @@ Where $RPATH is absolute path to script clearbckp.sh
 `0 1 * * * $RPATH/clearbckp.sh`
 
 Где $RPATH - абсолютный путь к скрипту clearbckp.sh
+
+Перезапустите cron: `systemctl restart cron`
