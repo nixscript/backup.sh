@@ -1,5 +1,5 @@
 #!/bin/bash
-
+# https://github.com/nixscript/backup.sh
 BDIR="/home/$USER/backups" # Директория хранения бекапов
 if [[ ! -d "$BDIR" ]]; then
   mkdir -p "$BDIR"
