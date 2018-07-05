@@ -2,7 +2,7 @@
 
 BDIR="/home/$USER/backups" # Директория хранения бекапов
 if [[ ! -d "$BDIR" ]]; then
-  mkdir "$BDIR"
+  mkdir -p "$BDIR"
 fi
 # Получаем текущую дату в секундах
 d=$(date +%s)
