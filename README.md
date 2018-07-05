@@ -1,15 +1,27 @@
 # backup.sh
 Shell for backup some files/dirs to remote computer
 
-```ssh-keygen -t rsa
+Generate ssh-key for connect to remote computer
 
-```scp "$HOME/.ssh/id_rsa.pub" $REMOTEUSER@$REMOTEHOST:/home/$REMOTEUSER/.ssh/authorized_keys
+`ssh-keygen -t rsa`
 
-```cp ./backup.sh /$HOME/bin/backup.sh
+Copy public ssh-key to remote computer (need remote password)
 
-```chmod +x $HOME/bin/backup
+`scp "$HOME/.ssh/id_rsa.pub" $REMOTEUSER@$REMOTEHOST:/home/$REMOTEUSER/.ssh/authorized_keys`
 
-```export EDITOR=nano
-```crontab -e
+Copy shell script in to home-directory
 
-```0 1 * * * $HOME/bin/backup
+`cp ./backup.sh /$HOME/bin/backup.sh`
+
+Change rights to execute
+
+`chmod +x $HOME/bin/backup`
+
+Add target for cron by nano editor. You can choice vi, mcedit, emacs. Just correct parameter for `export`
+
+`export EDITOR=nano`
+`crontab -e`
+
+Example target for cron. At 01:00 AM every night.
+
+`0 1 * * * $HOME/bin/backup`
