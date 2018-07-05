@@ -51,14 +51,22 @@ chmod +x ./clearbckp.sh
 DIST=$(uname -a | grep -i debian)
 if [[ -z "$DIST" ]]; then
 # Example target for cron. At 01:00 AM every night.
-        echo "0 1 * * * $HOME/bin/backup.sh" >> /var/spool/cron/root
+        SPOOL="/var/spool/cron/root"
 else
-        echo "0 1 * * * $HOME/bin/backup.sh" >> /var/spool/cron/crontabs/root
+        SPOOL="/var/spool/cron/crontabs/root"
 fi
+# Example target for cron. At 01:00 AM every night.
+CHCK=$(cat "$SPOOL" | grep -i "/bin/backup.sh")
+if [[ -z "$CHCK" ]]; then
+        echo "0 1 * * * $HOME/bin/backup.sh" >> $SPOOL
+else
+        sed "s%$CHCK%0 1 * * * $HOME/bin/backup.sh%" "$SPOOL"
+fi
+
 scp -B ./clearbckp.sh "$REMOTEUSER@$REMOTEHOST:$RPATH"
 
-echo "On the remote computer run:
-        export EDITOR=nano | crontab -e
-add type next string
-        0 1 * * * $RPATH/clearbckp.sh
-save and exit."
+echo -e "\\e[32;1mOn the remote computer run:\\e[33;1m
+        export EDITOR=nano | crontab -e\\e[32;1m
+add type next string\\e[33;1m
+        0 1 * * * $RPATH/clearbckp.sh\\e[32;1m
+save and exit.\\e[0m\n"
