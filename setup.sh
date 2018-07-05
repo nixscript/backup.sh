@@ -1,5 +1,5 @@
 #!/bin/bash
-
+# https://github.com/nixscript/backup.sh
 echo "Type login for the remote computer:"
 read -r REMOTEUSER
 if [[ -z "$REMOTEUSER" ]]; then
