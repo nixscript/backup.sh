@@ -49,7 +49,7 @@ chmod +x "$HOME/bin/backup.sh"
 chmod +x ./clearbckp.sh
 
 # Example target for cron. At 01:00 AM every night.
-echo "0 1 * * * $HOME/bin/backup.sh" >> /var/spool/cron/root
+echo "0 1 * * * $HOME/bin/backup.sh" >> /var/spool/cron/crontabs/root
 
 scp -B ./clearbckp.sh "$REMOTEUSER@$REMOTEHOST:$RPATH"
 
