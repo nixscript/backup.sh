@@ -20,6 +20,11 @@ read -r RPATH
 if [[ -z "$RPATH" ]]; then
         RPATH="/home/$REMOTEUSER/bin"
 fi
+echo "Type absolute paths files/dirs to backaup over space [example: /var/www /etc/apache2/sites-avialable]:"
+read TARGETS
+if [[ -z "$TARGETS" ]]; then
+        echo -e "\\e[33;1mWRONG! You must type some paths for backup! Run again.\\e[0m"
+fi
 if [[ ! -f "$HOME/.ssh/id_rsa.pub" ]]; then
 # Generate ssh-key for connect to remote computer
         ssh-keygen -t rsa
@@ -28,14 +33,9 @@ fi
 # Copy public ssh-key to remote computer (need remote password)
 scp "$HOME/.ssh/id_rsa.pub" "$REMOTEUSER@$REMOTEHOST:/home/$REMOTEUSER/.ssh/authorized_keys"
 
-sed "
-s/REMOTEUSER=\"user\"/REMOTEUSER=\"$REMOTEUSER\"/
-s/REMOTEHOST=\"example.com\"/REMOTEHOST=\"$REMOTEHOST\"/
-s/REMOTEPATH=\"/home/backupsdir/\"/REMOTEPATH=\"$REMOTEUSER\"/
-" ./backup.sh > ./tmp
-mv ./tmp ./backup.sh
-sed "s/BDIR=\"/home/\$USER/backups\"/BDIR=\"$REMOTEPATH\"/" ./clearbckp.sh > ./tmp
-mv ./tmp ./clearbckp.sh
+# Change params into scripts
+sed -i "s%REMOTEUSER=\"user\"%REMOTEUSER=\"$REMOTEUSER\"%; s%REMOTEHOST=\"example.com\"%REMOTEHOST=\"$REMOTEHOST\"%; s%REMOTEPATH=\"/home/backupsdir/\"%REMOTEPATH=\"$REMOTEPATH\"%; s%ARCHS=\"/var/www\"%ARCHS=\"$TARGETS\"%" ./backup.sh
+sed -i "s%BDIR=\"/home/\$USER/backups\"%BDIR=\"$REMOTEPATH\"%" ./clearbckp.sh
 
 if [[ ! -d "$HOME/bin" ]]; then
         mkdir -p "$HOME/bin"
