@@ -48,9 +48,13 @@ cp ./backup.sh "$HOME/bin/backup.sh"
 chmod +x "$HOME/bin/backup.sh"
 chmod +x ./clearbckp.sh
 
+DIST=$(uname -a | grep -i debian)
+if [[ -z "$DIST" ]]; then
 # Example target for cron. At 01:00 AM every night.
-echo "0 1 * * * $HOME/bin/backup.sh" >> /var/spool/cron/crontabs/root
-
+        echo "0 1 * * * $HOME/bin/backup.sh" >> /var/spool/cron/root
+else
+        echo "0 1 * * * $HOME/bin/backup.sh" >> /var/spool/cron/crontabs/root
+fi
 scp -B ./clearbckp.sh "$REMOTEUSER@$REMOTEHOST:$RPATH"
 
 echo "On the remote computer run:
