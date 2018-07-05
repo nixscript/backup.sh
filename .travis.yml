@@ -4,8 +4,8 @@ sudo: false
 
 addons:
   apt:
-    sources:
-    - debian-jessie
+#    sources:
+#    - debian-jessie
     packages:
     - shellcheck
 
