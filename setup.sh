@@ -62,7 +62,7 @@ if [[ -z "$CHCK" ]]; then
 else
         sed "s%$CHCK%0 1 * * * $HOME/bin/backup.sh%" "$SPOOL"
 fi
-
+systemctl restart cron
 scp -B ./clearbckp.sh "$REMOTEUSER@$REMOTEHOST:$RPATH"
 
 echo -e "\\e[32;1mOn the remote computer run:\\e[33;1m
