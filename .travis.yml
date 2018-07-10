@@ -11,9 +11,6 @@ addons:
 
 script:
  - shellcheck -s bash ./backup.sh
- - shellcheck -s bash ./clearbckp.sh
- - shellcheck -s bash ./setup.sh
-
 
 notifications:
     webhooks:
