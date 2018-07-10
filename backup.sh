@@ -1,18 +1,102 @@
 #!/bin/bash
 # https://github.com/nixscript/backup.sh
-REMOTEUSER="user" # login пользователя на удалённой машине
-REMOTEHOST="example.com" # Можно указать IP
-REMOTEPATH="/home/backupsdir/" # Либо создайте эту директорию на удалённой машине, либо укажите здесь другую.
-TMPDIR="/tmp" # Если в корне мало места, лучше заменить на /home/$USER
-TARGETS="/var/www"
+
+#REMOTEUSER="user" # login пользователя на удалённой машине
+#REMOTEHOST="example.com" # Можно указать IP
+#REMOTEPATH="/home/backupsdir/" # Либо создайте эту директорию на удалённой машине, либо укажите здесь другую.
+#TMPDIR="/tmp" # Если в корне мало места, лучше заменить на /home/$USER
+#TARGETS="/var/www" # Целевые пути, т.е. то, что бекапим. Можно несколько путей через пробел.
+
+source <(grep = /usr/etc/backup.sh/backup.cfg)
+
+if [[ $1 == "-c" || $1 == "--config" ]]; then
+	if [[ $LANG == "ru_RU.UTF-8" ]]; then
+		echo "Укажите логин удалённой машины:"
+	else
+		echo "Type login for the remote computer:"
+	fi
+	read -r REMOTEUSER
+	if [[ -z "$REMOTEUSER" ]]; then
+	        echo -e "\\e[33;1mWRONG! Run script again and type login correct!\\[0m"
+	fi
+	if [[ $LANG == "ru_RU.UTF-8" ]]; then
+		echo "Укажите имя удалённой машины или IP-адрес:"
+	else
+		echo "Type remote host name or IP for the remote computer:"
+	fi
+	read -r REMOTEHOST
+	if [[ -z "$REMOTEHOST" ]]; then
+	        echo -e "\\e[33;1mWRONG! Run script again and type remote host correct!\\[0m"
+	fi
+	if [[ $LANG == "ru_RU.UTF-8" ]]; then
+		echo "Укажите путь для бекапов на удалённой машине [/home/$REMOTEUSER/backups/]:"
+	else
+		echo "Type remote path for backups on the remote computer [/home/$REMOTEUSER/backups/]:"
+	fi
+	read -r REMOTEPATH
+	if [[ -z "$REMOTEPATH" ]]; then
+	        REMOTEPATH="/home/$REMOTEUSER/backups/"
+	fi
+	if [[ $LANG == "ru_RU.UTF-8" ]]; then
+		echo "Укажите существующий путь для скрипта clearbckp.sh на удалённой машине [/home/$REMOTEUSER/bin/]:"
+	else
+		echo "Type exists path for clearbckp.sh on the remote computer [/home/$REMOTEUSER/bin/]:"
+	fi
+	read -r RPATH
+	if [[ -z "$RPATH" ]]; then
+	        RPATH="/home/$REMOTEUSER/bin"
+	fi
+	if [[ $LANG == "ru_RU.UTF-8" ]]; then
+		echo "Укажите абсолютные пути к файлам и директориям, которые нужно бекапить, через пробел [Пример: /var/www/ /etc/apache2/sites-avialable]:"
+	else
+		echo "Type absolute paths files/dirs to backaup over space [example: /var/www /etc/apache2/sites-avialable]:"
+	fi
+	read -r TARGETS
+	if [[ -z "$TARGETS" ]]; then
+	        echo -e "\\e[33;1mWRONG! You must type some paths for backup! Run again.\\e[0m"
+	fi
+	if [[ ! -f "$HOME/.ssh/id_rsa.pub" ]]; then
+	# Generate ssh-key for connect to remote computer
+	        ssh-keygen -t rsa
+	fi
+	
+	# Copy public ssh-key to remote computer (need remote password)
+	scp "$HOME/.ssh/id_rsa.pub" "$REMOTEUSER@$REMOTEHOST:/home/$REMOTEUSER/.ssh/authorized_keys"
+	
+	# Change params into scripts
+	sed -i "s%REMOTEUSER=\"user\"%REMOTEUSER=\"$REMOTEUSER\"%; s%REMOTEHOST=\"example.com\"%REMOTEHOST=\"$REMOTEHOST\"%; s%REMOTEPATH=\"/home/backupsdir/\"%REMOTEPATH=\"$REMOTEPATH\"%; s%TARGETS=\"/var/www\"%TARGETS=\"$TARGETS\"%" /usr/local/etc/backup.sh/backup.cfg
+	echo '#!/bin/bash'>clearbckp.sh
+	echo "find ${REMOTEPATH}* -mtime +7 -exec rm {} \\;">>clearbckp.sh
+	echo '#!/bin/bash' > /etc/cron.daily/backup_sh
+	echo "source <(grep = /usr/etc/backup.sh/backup.cfg)" >> /etc/cron.daily/backup_sh
+	echo 'd=$(date +%F)' >> /etc/cron.daily/backup_sh
+	echo 'tar -cvf - $TARGETS | xz -9 --threads=0 - > "${d}backup.tar.xz"' >> /etc/cron.daily/backup_sh
+	echo 'scp -B "$TMPDIR/${d}backup.tar.xz" "$REMOTEUSER@$REMOTEHOST:$REMOTEPATH"' >> /etc/cron.daily/backup_sh
+	echo 'rm -f "$TMPDIR/${d}backup.tar.xz"' >> /etc/cron.daily/backup_sh
+	chmod +x /etc/cron.daily/backup_sh
+
+	if [[ -f /lib/systemd/system/cron.service ]]; then
+		systemctl restart cron
+	elif [[ -f /lib/systemd/system/crond.service ]]; then
+		systemctl restart crond
+	else
+		echo -e "\\e[31;1mWarning! You must restart cron!\n\\e[0m"
+	fi
+	echo -e "\\e[32;1mAdd crontab task on the remote computer like that:\n\\e[31;1m	0 1 * * * find $REMOTEPATH -mtime +7 -exec rm {} \\;\n\\e[32;1mOr copy file ./clearbckp.sh on the remote computer and add to crontab tasks.\\e[0m\n\n"
+	exit
+elif [[ ! -z $1 ]]; then
+	echo "Usage: backup.sh -c
+	backup.sh --config
+
+	"
+	exit
+else
 # Загоняем текущую дату в переменную
-d=$(date +%F)
-# Упаковываем файлы и прочее в TAR
-# Не забудьте заменить на свои файлы и директории!
-tar -cf "$TMPDIR/${d}backup.tar" $TARGETS
-# Сжимаем максимально
-gzip -9 "$TMPDIR/${d}backup.tar"
+	d=$(date +%F)
+# Упаковываем файлы и прочее в TAR и XZ с максимальным сжатием
+	tar -cvf - $TARGETS | xz -9 --threads=0 - > "${d}backup.tar.xz"
 # Отправляем на удалённую машину
-scp -B "$TMPDIR/${d}backup.tar.gz" "$REMOTEUSER@$REMOTEHOST:$REMOTEPATH"
+	scp -B "$TMPDIR/${d}backup.tar.xz" "$REMOTEUSER@$REMOTEHOST:$REMOTEPATH"
 # Удаляем архив, чтобы не занимать пространство на диске без пользы
-rm -f "$TMPDIR/${d}backup.tar.gz"
+	rm -f "$TMPDIR/${d}backup.tar.xz"
+fi
