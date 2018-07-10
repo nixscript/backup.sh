@@ -6,8 +6,8 @@
 #REMOTEPATH="/home/backupsdir/" # Либо создайте эту директорию на удалённой машине, либо укажите здесь другую.
 #TMPDIR="/tmp" # Если в корне мало места, лучше заменить на /home/$USER
 #TARGETS="/var/www" # Целевые пути, т.е. то, что бекапим. Можно несколько путей через пробел.
-
-source <(grep = /usr/etc/backup.sh/backup.cfg)
+# shellcheck source=/dev/null
+source <(grep "=" /usr/local/etc/backup.sh/backup.cfg)
 
 if [[ $1 == "-c" || $1 == "--config" ]]; then
 	if [[ $LANG == "ru_RU.UTF-8" ]]; then
@@ -65,14 +65,18 @@ if [[ $1 == "-c" || $1 == "--config" ]]; then
 	
 	# Change params into scripts
 	sed -i "s%REMOTEUSER=\"user\"%REMOTEUSER=\"$REMOTEUSER\"%; s%REMOTEHOST=\"example.com\"%REMOTEHOST=\"$REMOTEHOST\"%; s%REMOTEPATH=\"/home/backupsdir/\"%REMOTEPATH=\"$REMOTEPATH\"%; s%TARGETS=\"/var/www\"%TARGETS=\"$TARGETS\"%" /usr/local/etc/backup.sh/backup.cfg
-	echo '#!/bin/bash'>clearbckp.sh
-	echo "find ${REMOTEPATH}* -mtime +7 -exec rm {} \\;">>clearbckp.sh
+	{
+		echo '#!/bin/bash'
+		echo "find ${REMOTEPATH}* -mtime +7 -exec rm {} \\;"
+	} >> clearbckp.sh
 	echo '#!/bin/bash' > /etc/cron.daily/backup_sh
-	echo "source <(grep = /usr/etc/backup.sh/backup.cfg)" >> /etc/cron.daily/backup_sh
-	echo 'd=$(date +%F)' >> /etc/cron.daily/backup_sh
-	echo 'tar -cvf - $TARGETS | xz -9 --threads=0 - > "${d}backup.tar.xz"' >> /etc/cron.daily/backup_sh
-	echo 'scp -B "$TMPDIR/${d}backup.tar.xz" "$REMOTEUSER@$REMOTEHOST:$REMOTEPATH"' >> /etc/cron.daily/backup_sh
-	echo 'rm -f "$TMPDIR/${d}backup.tar.xz"' >> /etc/cron.daily/backup_sh
+	{
+		echo "source <(grep = /usr/etc/backup.sh/backup.cfg)"
+		echo "d=\$(date +%F)"
+		echo "tar -cvf - \$TARGETS | xz -9 --threads=0 - > \"${d}backup.tar.xz\""
+		echo "scp -B \"\$TMPDIR/\${d}backup.tar.xz\" \"$REMOTEUSER@$REMOTEHOST:$REMOTEPATH\""
+		echo "rm -f \"\$TMPDIR/\${d}backup.tar.xz\""
+	} >> /etc/cron.daily/backup_sh
 	chmod +x /etc/cron.daily/backup_sh
 
 	if [[ -f /lib/systemd/system/cron.service ]]; then
@@ -94,7 +98,7 @@ else
 # Загоняем текущую дату в переменную
 	d=$(date +%F)
 # Упаковываем файлы и прочее в TAR и XZ с максимальным сжатием
-	tar -cvf - $TARGETS | xz -9 --threads=0 - > "${d}backup.tar.xz"
+	tar -cvf - "$TARGETS" | xz -9 --threads=0 - > "${d}backup.tar.xz"
 # Отправляем на удалённую машину
 	scp -B "$TMPDIR/${d}backup.tar.xz" "$REMOTEUSER@$REMOTEHOST:$REMOTEPATH"
 # Удаляем архив, чтобы не занимать пространство на диске без пользы
