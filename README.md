@@ -16,6 +16,9 @@ After that you can see task string for the remote computer, or you can copy scri
 * Add task
 * Restart cron: `systemctl restart cron`
 
+## Uninstall
+Run `sudo make uninstall` in source directory.
+
 # backup.sh
 Скрипт для бекапа файлов/директорий на удалённый комп.
 
@@ -29,3 +32,6 @@ After that you can see task string for the remote computer, or you can copy scri
 ## на удалённом компе
 * Добавьте задачу в cron
 * Перезапустите cron: `systemctl restart cron`
+
+## Удаление
+Выполните `sudo make uninstall` в директории с исходниками.
