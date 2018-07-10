@@ -1,11 +1,6 @@
 #!/bin/bash
 # https://github.com/nixscript/backup.sh
 
-#REMOTEUSER="user" # login пользователя на удалённой машине
-#REMOTEHOST="example.com" # Можно указать IP
-#REMOTEPATH="/home/backupsdir/" # Либо создайте эту директорию на удалённой машине, либо укажите здесь другую.
-#TMPDIR="/tmp" # Если в корне мало места, лучше заменить на /home/$USER
-#TARGETS="/var/www" # Целевые пути, т.е. то, что бекапим. Можно несколько путей через пробел.
 # shellcheck source=/dev/null
 source <(grep "=" /usr/local/etc/backup.sh/backup.cfg)
 
