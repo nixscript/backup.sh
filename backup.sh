@@ -96,10 +96,12 @@ Type the number [default: 1]:"
 	fi
 	echo '#!/bin/bash' > /etc/cron.daily/backup_sh
 	{
-		echo "source <(grep = /usr/local/etc/backup.sh/backup.cfg)"
+		echo "# shellcheck source=/dev/null"
+		echo "source <(grep \"=\" /usr/local/etc/backup.sh/backup.cfg)"
 		echo "d=\$(date +%F)"
 		echo "if [[ \$TARCHS == \"1\" ]]; then"
-		echo "	tar -cvf - \$TARGETS | xz -9 --threads=0 - > \"\$TMPDIR/\${d}backup.tar.xz\""
+		echo "	CMD=\"tar -cvf - \$TARGETS\""
+		echo "	\$CMD | xz -9 --threads=0 - > \"\$TMPDIR/\${d}backup.tar.xz\""
 		echo "else"
 		echo "	LIST=\"\""
 		echo "	for i in \$TARGETS"
@@ -108,7 +110,9 @@ Type the number [default: 1]:"
 		echo "		LIST=\"\$LIST"
 		echo "\$L\""
 		echo "	done"
-		echo "	tar -cvf - \$LIST | xz -9 --threads=0 - > \"\$TMPDIR/\${d}backup.tar.xz\""
+		printf "	LIST=\$(echo \"\$LIST\" | tr \"\\\n\" \" \")\n"
+		echo "	CMD=\"tar -cvf - \${LIST:1:-1}\""
+		echo "	\$CMD | xz -9 --threads=0 - > \"\$TMPDIR/\${d}backup.tar.xz\""
 		echo "fi"
 		echo "scp -B \"\$TMPDIR/\${d}backup.tar.xz\" \"$REMOTEUSER@$REMOTEHOST:$REMOTEPATH\""
 		echo "rm -f \"\$TMPDIR/\${d}backup.tar.xz\""
@@ -151,7 +155,9 @@ else
 			LIST="$LIST
 $L"
 		done
-		tar -cvf - $LIST | xz -9 --threads=0 - > "$TMPDIR/${d}backup.tar.xz"
+		LIST=$(echo "$LIST" | tr "\n" " ")
+		CMD="tar -cvf - ${LIST:1:-1}"
+		$CMD | xz -9 --threads=0 - > "$TMPDIR/${d}backup.tar.xz"
 	else
 		exit
 	fi
