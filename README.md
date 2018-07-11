@@ -10,9 +10,13 @@ Download scripts archive, extract, enter to extracted directory and run `sudo ma
 
 Answer correct on the questions. You must set exist paths of remote computer! It's important!
 
-After that you can see task string for the remote computer, or you can copy script ./clearbckp.sh to remote computer and add a task for cron.
+If You choice only updates, You should not adding task for cron on the remote computer.
+
+Else, You can see task string for the remote computer, or you can copy script ./clearbckp.sh to remote computer and add a task for cron.
 
 ## on remote computer
+If You choice full archive:
+
 * Add task
 * Restart cron: `systemctl restart cron`
 
@@ -27,9 +31,13 @@ Run `sudo make uninstall` in source directory.
 
 Правильно ответьте на вопросы скрипта. Укажите существующие пути на удалённой машине! Это очень важно!
 
-После этого вы увидите строку для включения в cron на удалённом компе, или можете скопировать ./clearbckp.sh на удалённый комп и добавить задачу с ним.
+Если вы выбрали только изменения, не следует добавлять задачу в cron на удалённом компе.
+
+Иначе вы увидите строку для включения в cron на удалённом компе, или можете скопировать ./clearbckp.sh на удалённый комп и добавить задачу с ним.
 
 ## на удалённом компе
+Если выбрали полный архив:
+
 * Добавьте задачу в cron
 * Перезапустите cron: `systemctl restart cron`
 
