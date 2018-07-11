@@ -114,7 +114,7 @@ Type the number [default: 1]:"
 		echo "	CMD=\"tar -cvf - \${LIST:1:-1}\""
 		echo "	\$CMD | xz -9 --threads=0 - > \"\$TMPDIR/\${d}backup.tar.xz\""
 		echo "fi"
-		echo "scp -B \"\$TMPDIR/\${d}backup.tar.xz\" \"$REMOTEUSER@$REMOTEHOST:$REMOTEPATH\""
+		echo "scp -B \"\$TMPDIR/\${d}backup.tar.xz\" \"\$REMOTEUSER@\$REMOTEHOST:\$REMOTEPATH\""
 		echo "rm -f \"\$TMPDIR/\${d}backup.tar.xz\""
 	} >> /etc/cron.daily/backup_sh
 	chmod +x /etc/cron.daily/backup_sh
